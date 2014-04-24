@@ -176,14 +176,39 @@ fi
 # 4. Start servers.
 #
 
+filename=$(basename $artifact)
+
 $jboss_dir/bin/jboss-cli.sh --connect --controller=$domain --user=$username \
 --password=$password --command="/server-group=$group:stop-servers()"
 
-$jboss_dir/bin/jboss-cli.sh --connect --controller=$domain --user=$username \
---password=$password --command="undeploy $artifact --server-groups=$group"
+if test $? == '0' ; then
+    $jboss_dir/bin/jboss-cli.sh --connect --controller=$domain \
+    --user=$username --password=$password \
+    --command="undeploy $filename --server-groups=$group"
+else
+    echo "ERROR: problem to stop the group server $group."
+    exit 1
+fi
 
-$jboss_dir/bin/jboss-cli.sh --connect --controller=$domain --user=$username \
---password=$password --command="deploy $artifact --server-groups=$group"
+if test $? == '0' ; then
+    $jboss_dir/bin/jboss-cli.sh --connect --controller=$domain \
+    --user=$username --password=$password \
+    --command="deploy $artifact --server-groups=$group"
+else
+    echo "ERROR: problem to undeploy $filename."
+    exit 1
+fi
 
-$jboss_dir/bin/jboss-cli.sh --connect --controller=$domain --user=$username \
---password=$password --command="/server-group=$group:start-servers()"
+if test $? == '0' ; then
+    $jboss_dir/bin/jboss-cli.sh --connect --controller=$domain \
+    --user=$username --password=$password \
+    --command="/server-group=$group:start-servers()"
+else
+    echo "ERROR: problem to deploy $filename."
+    exit 1
+fi
+
+if test $? != '0' ; then
+    echo "ERROR: problem to start server group $group."
+    exit 1
+fi
