@@ -2,23 +2,21 @@
 #
 # jb6_artifact_deploy.sh
 #
-# Nilton Moura <github.com/nmoura>
+# Autor: Nilton Silva de Moura <y6hw@petrobras.com.br>
 #
 # ----------------------------------------------------------------------------
 #
-# Do stop-undeploy-deploy-start in a JBoss EAP 6 domain
+# Faz cold-deploy num controlador de domínio do JBoss EAP 6.
 #
-# The jb6_artifact_deploy.conf must have at least the jboss_dir variable
-# configured, with a JBoss 6 EAP directory that contains ./bin/jboss-cli.sh.
-#
-# Example: jboss_dir = /opt/jboss/jboss-eap-6.2
-#
+# Deve ser executado em um host que tenha o JBoss EAP 6 instalado, porque
+# utiliza o comando jboss-cli.sh do diretório bin/ da instalação do JBoss.
+# 
 # 
 # ----------------------------------------------------------------------------
 #
 
 #
-# Beginning
+# Início
 #
 usage_message="
 Usage: $(basename "$0") -a file -g group [-c configuration file] \\
@@ -134,7 +132,7 @@ if test -z "$port" ; then
 fi
 
 #
-# Get the data from the configuration file
+# Get environment data from the configuration file
 #
 if test -n "$environment" ; then
     if test -z $domain ; then
@@ -184,10 +182,17 @@ $jboss_dir/bin/jboss-cli.sh --connect --controller=$domain --user=$username \
 if test $? == '0' ; then
     $jboss_dir/bin/jboss-cli.sh --connect --controller=$domain \
     --user=$username --password=$password \
-    --command="undeploy $filename --server-groups=$group"
+    --command="ls /server-group=$group/deployment" | grep ^"$filename"$ \
+    &> /dev/null
 else
     echo "ERROR: problem to stop the group server $group."
     exit 1
+fi
+
+if test $? == '0' ; then
+    $jboss_dir/bin/jboss-cli.sh --connect --controller=$domain \
+    --user=$username --password=$password \
+    --command="undeploy $filename --server-groups=$group"
 fi
 
 if test $? == '0' ; then
