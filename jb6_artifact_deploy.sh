@@ -2,21 +2,23 @@
 #
 # jb6_artifact_deploy.sh
 #
-# Autor: Nilton Silva de Moura <y6hw@petrobras.com.br>
+# Nilton Moura <github.com/nmoura>
 #
 # ----------------------------------------------------------------------------
 #
-# Faz cold-deploy num controlador de domínio do JBoss EAP 6.
+# Do stop-undeploy-deploy-start in a JBoss EAP 6 domain
 #
-# Deve ser executado em um host que tenha o JBoss EAP 6 instalado, porque
-# utiliza o comando jboss-cli.sh do diretório bin/ da instalação do JBoss.
-# 
+# The jb6_artifact_deploy.conf must have at least the jboss_dir variable
+# configured, with a JBoss 6 EAP directory that contains ./bin/jboss-cli.sh.
+#
+# Example: jboss_dir = /opt/jboss/jboss-eap-6.2
+#
 # 
 # ----------------------------------------------------------------------------
 #
 
 #
-# Início
+# Beggining
 #
 usage_message="
 Usage: $(basename "$0") -a file -g group [-c configuration file] \\
