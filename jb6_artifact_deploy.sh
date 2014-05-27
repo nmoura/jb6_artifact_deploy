@@ -187,6 +187,11 @@ if test $? == '0' ; then
     --command="ls /server-group=$group/deployment" | grep ^"$filename"$ \
     &> /dev/null
 else
+    # This doesn't ensure that the process stopped successfully
+    # because, even if a problem occur, the exit status can be 0,
+    # with just an '"result" => undefined' message, that we
+    # can't use, because this is the same message if the stopped
+    # was successfully.
     echo "ERROR: problem to stop the group server $group."
     exit 1
 fi
