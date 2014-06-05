@@ -202,12 +202,12 @@ for entry in $server_in_hc ; do
   server=$(echo $entry | cut -d '/' -f 2)
 
   echo "Stopping $server on $hc."
-  $jboss_dir/bin/jboss-cli.sh --connect --controller=$domain \
+  stopcmd=$($jboss_dir/bin/jboss-cli.sh --connect --controller=$domain \
   --user=$username --password=$password \
-  --command="/host=$hc/server-config=$server:stop(blocking=true)" \
-  &> /dev/null
+  --command="/host=$hc/server-config=$server:stop(blocking=true)")
 
-  if [ $? != "0" ] ; then
+  stopresult=$(echo $stopcmd | cut -d ',' -f 1 | cut -d '>' -f 2 | tr -d ' ')
+  if [ "$stopresult" != '"success"' ] ; then
     echo "ERROR: Unsuccessful stop command for $server from $hc."
     exit 1
   fi
@@ -230,8 +230,8 @@ if test $? == '0' ; then
     echo "Undeploying $filename from $group server group."
     $jboss_dir/bin/jboss-cli.sh --connect --controller=$domain \
     --user=$username --password=$password \
-    --command="undeploy $filename --server-groups=$group" \
-    &> /dev/null
+    --command="undeploy $filename --server-groups=$group"
+#    &> /dev/null
 
     if test $? != '0' ; then
       echo "ERROR: problem to undeploy $filename on $group server group."
@@ -262,12 +262,12 @@ for entry in $server_in_hc ; do
   server=$(echo $entry | cut -d '/' -f 2)
 
   echo "Starting $server on $hc."
-  $jboss_dir/bin/jboss-cli.sh --connect --controller=$domain \
+  startcmd=$($jboss_dir/bin/jboss-cli.sh --connect --controller=$domain \
   --user=$username --password=$password \
-  --command="/host=$hc/server-config=$server:start(blocking=true)" \
-  &> /dev/null
+  --command="/host=$hc/server-config=$server:start(blocking=true)")
 
-  if [ $? != "0" ] ; then
+  startresult=$(echo $startcmd | cut -d ',' -f 1 | cut -d '>' -f 2 | tr -d ' ')
+  if [ "$startresult" != '"success"' ] ; then
     echo "ERROR: Unsuccessful start command for $server on $hc."
     exit 1
   fi
